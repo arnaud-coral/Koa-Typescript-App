@@ -6,6 +6,7 @@ import rateLimit from 'koa-ratelimit';
 import Redis from 'ioredis';
 import errorHandler from './middleware/errorHandler';
 import loggerMiddleware from './middleware/logger';
+import connectDB from './database/mongoConnection';
 
 import healthcheckRoute from './routes/healthCheckRoute';
 
@@ -15,6 +16,11 @@ const REDIS_PORT = process.env.REDIS_PORT
     : 6379;
 
 const app = new Koa();
+
+connectDB().catch((error) => {
+    console.error('Failed to connect to MongoDB', error);
+    process.exit(1);
+});
 
 const redis = new Redis({
     port: REDIS_PORT,
