@@ -1,6 +1,6 @@
 
 # Stage 1: Build
-FROM node:18.18.2-alpine3.18 as builder
+FROM node:20.11.0-alpine3.19 as builder
 ARG APP_PORT=3000
 ENV PORT=$APP_PORT
 WORKDIR /usr/src/app
@@ -10,7 +10,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production environment
-FROM node:18.18.2-alpine3.18
+FROM node:20.11.0-alpine3.19
 ENV PORT=$APP_PORT
 WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/dist ./dist
