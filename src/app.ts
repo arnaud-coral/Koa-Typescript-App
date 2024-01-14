@@ -6,7 +6,7 @@ import rateLimit from 'koa-ratelimit';
 import Redis from 'ioredis';
 import errorHandler from './middleware/errorHandler';
 import loggerMiddleware from './middleware/logger';
-import connectDB from './database/mongoConnection';
+import connectDB from './helpers/mongoConnection';
 import loadRoutes from './helpers/loadRoutes';
 
 import healthcheckRoute from './routes/healthCheckRoute';
