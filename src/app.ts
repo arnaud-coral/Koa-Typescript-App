@@ -6,10 +6,8 @@ import rateLimit from 'koa-ratelimit';
 import Redis from 'ioredis';
 import errorHandler from './middleware/errorHandler';
 import loggerMiddleware from './middleware/logger';
-import connectDB from './helpers/mongoConnection';
-import loadRoutes from './helpers/loadRoutes';
-
-import healthcheckRoute from './routes/healthCheckRoute';
+import connectDB from './helpers/mongoConnector';
+import loadRoutes from './helpers/routesLoader';
 
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
 const REDIS_PORT = process.env.REDIS_PORT

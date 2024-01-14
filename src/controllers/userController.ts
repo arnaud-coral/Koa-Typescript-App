@@ -1,8 +1,14 @@
 import Koa from 'koa';
 import userService from '../services/userService';
+import { generateJWT } from '../helpers/jwtEmitter';
 
 interface RegisterRequestBody {
     username: string;
+    email: string;
+    password: string;
+}
+
+interface LoginRequestBody {
     email: string;
     password: string;
 }
@@ -47,4 +53,33 @@ const registerUser = async (ctx: Koa.Context) => {
     }
 };
 
-export { registerUser };
+const loginUser = async (ctx: Koa.Context) => {
+    try {
+        const { email, password } = ctx.request.body as LoginRequestBody;
+
+        // Authenticate the user
+        const user = await userService.authenticateUser(email, password);
+        if (!user) {
+            ctx.status = 401;
+            ctx.body = { message: 'Invalid email or password' };
+            return;
+        }
+
+        const token = generateJWT(user);
+
+        ctx.cookies.set('Authorization', token, { httpOnly: true });
+
+        ctx.status = 200;
+        ctx.body = { message: 'Login successful' };
+    } catch (error) {
+        let errorMessage = 'An unknown error occurred';
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+
+        ctx.status = 500;
+        ctx.body = { message: errorMessage };
+    }
+};
+
+export { registerUser, loginUser };

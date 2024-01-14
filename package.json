@@ -20,6 +20,7 @@
         "bcryptjs": "^2.4.3",
         "dotenv": "^16.3.1",
         "ioredis": "^5.3.2",
+        "jsonwebtoken": "^9.0.2",
         "koa": "^2.14.2",
         "koa-bodyparser": "^4.4.1",
         "koa-helmet": "^7.0.2",
@@ -31,6 +32,7 @@
     "devDependencies": {
         "@types/bcryptjs": "^2.4.6",
         "@types/jest": "^29.5.11",
+        "@types/jsonwebtoken": "^9.0.5",
         "@types/koa": "^2.13.12",
         "@types/koa__cors": "^5.0.0",
         "@types/koa-bodyparser": "^4.3.12",
