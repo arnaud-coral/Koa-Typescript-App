@@ -82,4 +82,21 @@ const loginUser = async (ctx: Koa.Context) => {
     }
 };
 
-export { registerUser, loginUser };
+const deleteUser = async (ctx: Koa.Context) => {
+    try {
+        const userId = ctx.params.id;
+        await userService.deleteUser(userId);
+        ctx.status = 200;
+        ctx.body = { message: 'User successfully deleted' };
+    } catch (error) {
+        let errorMessage = 'An unknown error occurred';
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+
+        ctx.status = 500;
+        ctx.body = { message: errorMessage };
+    }
+};
+
+export { registerUser, loginUser, deleteUser };

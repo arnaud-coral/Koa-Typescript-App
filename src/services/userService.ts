@@ -1,4 +1,5 @@
 import User from '../models/userModel';
+import { ObjectId } from 'mongodb';
 import bcrypt from 'bcryptjs';
 
 class UserService {
@@ -33,6 +34,13 @@ class UserService {
         }
 
         return user;
+    }
+
+    async deleteUser(userId: string) {
+        const result = await User.findByIdAndDelete(userId);
+        if (!result) {
+            throw new Error('User not found');
+        }
     }
 }
 
