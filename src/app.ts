@@ -7,6 +7,7 @@ import Redis from 'ioredis';
 import errorHandler from './middleware/errorHandler';
 import loggerMiddleware from './middleware/logger';
 import connectDB from './database/mongoConnection';
+import loadRoutes from './helpers/loadRoutes';
 
 import healthcheckRoute from './routes/healthCheckRoute';
 
@@ -53,7 +54,9 @@ app.use(bodyParser());
 app.use(errorHandler);
 app.use(loggerMiddleware);
 
-app.use(healthcheckRoute.routes());
-app.use(healthcheckRoute.allowedMethods());
+const routes = loadRoutes();
+routes.forEach((route) => {
+    app.use(route.routes()).use(route.allowedMethods());
+});
 
 export default app;
