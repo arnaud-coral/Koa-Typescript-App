@@ -16,7 +16,7 @@ echo "Running app in $NODE_ENV environment..."
 
 # Check if NODE_ENV is set to 'local'
 if [ "$NODE_ENV" = "local" ]; then
-    docker-compose -f docker-compose.local.yml up --build --force-recreate
+    docker-compose -f docker-compose.local.yml up --build
 else
-    docker-compose -f docker-compose.yml up --build --force-recreate
+    docker-compose -f docker-compose.yml up --build
 fi

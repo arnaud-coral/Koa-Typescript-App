@@ -1,3 +1,5 @@
 .env
-node_modules
 redis-data
+mongo-data
+node_modules
+log
