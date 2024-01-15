@@ -1,16 +1,23 @@
 import { Context } from 'koa';
-import { HealthCheckService } from '../services/healthCheckService';
+import healthCheckService from '../services/healthCheckService';
 
-export class HealthCheckController {
-    private healthCheckService: HealthCheckService;
+class HealthCheckController {
+    async checkHealth(ctx: Context) {
+        try {
+            const healthStatus = await healthCheckService.checkHealth();
 
-    constructor() {
-        this.healthCheckService = new HealthCheckService();
-    }
+            ctx.status = 200;
+            ctx.body = healthStatus;
+        } catch (error) {
+            let errorMessage = 'An unknown error occurred';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
 
-    checkHealth = async (ctx: Context) => {
-        const healthStatus = await this.healthCheckService.checkHealth();
-        ctx.status = 200;
-        ctx.body = healthStatus;
+            ctx.status = 500;
+            ctx.body = { message: errorMessage };
+        }
     };
 }
+
+export default new HealthCheckController();
