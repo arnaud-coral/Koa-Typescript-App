@@ -1,5 +1,4 @@
 import User from '../models/userModel';
-import { ObjectId } from 'mongodb';
 import bcrypt from 'bcryptjs';
 
 class UserService {
