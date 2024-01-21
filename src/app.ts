@@ -1,13 +1,14 @@
 import Koa from 'koa';
+import errorHandler from './middleware/errorHandler';
+import loggerMiddleware from './middleware/logger';
 import bodyParser from 'koa-bodyparser';
 import helmet from 'koa-helmet';
 import cors from '@koa/cors';
 import rateLimit from 'koa-ratelimit';
 import Redis from 'ioredis';
-import errorHandler from './middleware/errorHandler';
-import loggerMiddleware from './middleware/logger';
 import connectDB from './helpers/mongoConnector';
 import loadRoutes from './helpers/routesLoader';
+
 
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
 const REDIS_PORT = process.env.REDIS_PORT
@@ -26,6 +27,22 @@ const redis = new Redis({
     host: REDIS_HOST,
 });
 
+app.use(helmet());
+app.use(
+    cors({
+        origin: '*',
+        allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+    })
+);
+app.use(bodyParser());
+app.use(loggerMiddleware);
+app.use(errorHandler);
+
+const routes = loadRoutes();
+routes.forEach((route) => {
+    app.use(route.routes()).use(route.allowedMethods());
+});
+
 app.use(
     rateLimit({
         driver: 'redis',
@@ -41,20 +58,5 @@ app.use(
         max: 100,
     })
 );
-app.use(
-    cors({
-        origin: '*',
-        allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-    })
-);
-app.use(helmet());
-app.use(bodyParser());
-app.use(errorHandler);
-app.use(loggerMiddleware);
-
-const routes = loadRoutes();
-routes.forEach((route) => {
-    app.use(route.routes()).use(route.allowedMethods());
-});
 
 export default app;

@@ -1,34 +1,53 @@
-import { type Context, type Next } from 'koa'
-import type Koa from 'koa';
+import { type Context, type Next } from 'koa';
 import logger from '../config/loggingConfig';
 
-class HttpError extends Error {
+export class HttpError extends Error {
     status: number;
+    code: string;
 
-    constructor (message: string, status: number) {
+    constructor(message: string, status: number, code: string) {
         super(message);
+        this.name = 'HttpError';
         this.status = status;
+        this.code = code;
     }
 }
 
-const errorHandler: Koa.Middleware = async (ctx: Context, next: Next) => {
+async function errorHandler(ctx: Context, next: Next): Promise<void> {
     try {
         await next();
-    } catch (err) {
-        if (err instanceof HttpError) {
-            ctx.status = err.status || 500;
+    } catch (error) {
+        ctx.set('Content-Type', 'application/json');
+
+        if (error instanceof HttpError) {
+            ctx.status = error.status;
             ctx.body = {
-                error: err.message || 'Internal Server Error'
+                result: 'error',
+                data: {
+                    code: error.code,
+                    status: error.status,
+                    message: error.message,
+                },
+            };
+        } else {
+            const unknownError = error as Error;
+            ctx.status = 500;
+            ctx.body = {
+                result: 'error',
+                data: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    status: 500,
+                    message: 'An internal server error occurred.',
+                },
             };
 
-            logger.error(`Error: ${err.message}`, { stack: err.stack, status: ctx.status });
-        } else {
-            ctx.status = 500;
-            ctx.body = { error: 'Internal Server Error' };
-            logger.error('Non-Error type thrown', { status: ctx.status });
+            logger.error('Uncaught error:', {
+                error: {
+                    message: unknownError.message,
+                    stack: unknownError.stack,
+                },
+            });
         }
-
-        ctx.app.emit('error', err, ctx);
     }
 };
 

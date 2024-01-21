@@ -1,6 +1,7 @@
 import Koa from 'koa';
 import userService from '../services/userService';
 import { generateJWT } from '../helpers/jwtEmitter';
+import { HttpError } from '../middleware/errorHandler';
 
 interface RegisterRequestBody {
     username: string;
@@ -15,93 +16,69 @@ interface LoginRequestBody {
 
 class UserController {
     async registerUser(ctx: Koa.Context) {
-        try {
-            const { username, email, password } = ctx.request
-                .body as RegisterRequestBody;
+        const { username, email, password } = ctx.request.body as RegisterRequestBody;
 
-            // Check if username is already taken
-            const isUsernameTaken = await userService.isUsernameTaken(username);
-            if (isUsernameTaken) {
-                ctx.status = 400;
-                ctx.body = { message: 'Username is already taken' };
-                return;
-            }
-
-            // Check if email is already taken
-            const isEmailTaken = await userService.isEmailTaken(email);
-            if (isEmailTaken) {
-                ctx.status = 400;
-                ctx.body = { message: 'Email is already registered' };
-                return;
-            }
-
-            // Register the user if username and email are not taken
-            const user = await userService.registerUser(
-                username,
-                email,
-                password
+        const isUsernameTaken = await userService.isUsernameTaken(username);
+        if (isUsernameTaken) {
+            throw new HttpError(
+                'Username is already taken',
+                400,
+                'USERNAME_TAKEN'
             );
-
-            ctx.status = 201;
-            ctx.body = {
-                message: 'User successfully registered',
-                userId: user._id,
-            };
-        } catch (error) {
-            let errorMessage = 'An unknown error occurred';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-
-            ctx.status = 400;
-            ctx.body = { message: errorMessage };
         }
+
+        const isEmailTaken = await userService.isEmailTaken(email);
+        if (isEmailTaken) {
+            throw new HttpError(
+                'Email is already registered',
+                400,
+                'EMAIL_REGISTERED'
+            );
+        }
+
+        const user = await userService.registerUser(
+            username,
+            email,
+            password
+        );
+
+        ctx.status = 201;
+        ctx.body = {
+            result: 'ok',
+            data: {
+                message: 'User successfully registered',
+                userId: user._id
+            }
+        };
     };
 
     async loginUser(ctx: Koa.Context) {
-        try {
-            const { email, password } = ctx.request.body as LoginRequestBody;
-
-            // Authenticate the user
-            const user = await userService.authenticateUser(email, password);
-            if (!user) {
-                ctx.status = 401;
-                ctx.body = { message: 'Invalid email or password' };
-                return;
-            }
-
-            const token = generateJWT(user);
-
-            ctx.cookies.set('Authorization', token, { httpOnly: true });
-
-            ctx.status = 200;
-            ctx.body = { message: 'Login successful' };
-        } catch (error) {
-            let errorMessage = 'An unknown error occurred';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-
-            ctx.status = 500;
-            ctx.body = { message: errorMessage };
+        const { email, password } = ctx.request.body as LoginRequestBody;
+        const user = await userService.authenticateUser(email, password);
+        if (!user) {
+            throw new HttpError(
+                'Invalid email or password',
+                401,
+                'INVALID_CREDENTIALS'
+            );
         }
+
+        const token = generateJWT(user);
+
+        ctx.cookies.set('Authorization', token, { httpOnly: true });
+        ctx.status = 200;
+        ctx.body = { result: 'ok', data: { message: 'Login successful' }};
     };
 
     async deleteUser(ctx: Koa.Context) {
-        try {
-            const userId = ctx.params.id;
-            await userService.deleteUser(userId);
-            ctx.status = 200;
-            ctx.body = { message: 'User successfully deleted' };
-        } catch (error) {
-            let errorMessage = 'An unknown error occurred';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-
-            ctx.status = 500;
-            ctx.body = { message: errorMessage };
+        const userId = ctx.params.id;
+        const isDeletedUser = await userService.deleteUser(userId);
+        if (!isDeletedUser) {
+            throw new HttpError('User not found', 400, 'USER_NOT_FOUND');
         }
+
+        ctx.status = 200;
+        ctx.body = { result: 'ok', data: { message: 'User successfully deleted' }};
     };
 }
 

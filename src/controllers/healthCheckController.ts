@@ -1,22 +1,19 @@
-import { Context } from 'koa';
+import Koa from 'koa';
 import healthCheckService from '../services/healthCheckService';
+import { HttpError } from '../middleware/errorHandler';
 
 class HealthCheckController {
-    async checkHealth(ctx: Context) {
-        try {
-            const healthStatus = await healthCheckService.checkHealth();
-
-            ctx.status = 200;
-            ctx.body = healthStatus;
-        } catch (error) {
-            let errorMessage = 'An unknown error occurred';
-            if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-
-            ctx.status = 500;
-            ctx.body = { message: errorMessage };
+    async checkHealth(ctx: Koa.Context) {
+        const healthStatus = await healthCheckService.checkHealth();
+        if (healthStatus?.status !== 'UP') {
+            throw new HttpError(
+                'Service is currently down',
+                200,
+                'DOWN'
+            );
         }
+        ctx.status = 200;
+        ctx.body = { result: 'ok', data: { message: healthStatus }};
     };
 }
 

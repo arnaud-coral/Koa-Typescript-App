@@ -24,12 +24,12 @@ class UserService {
     async authenticateUser(email: string, password: string) {
         const user = await User.findOne({ email });
         if (!user) {
-            return null;
+            return false;
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return null;
+            return false;
         }
 
         return user;
@@ -38,8 +38,10 @@ class UserService {
     async deleteUser(userId: string) {
         const result = await User.findByIdAndDelete(userId);
         if (!result) {
-            throw new Error('User not found');
+            return false;
         }
+
+        return true;
     }
 }
 

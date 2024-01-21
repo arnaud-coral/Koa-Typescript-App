@@ -22,13 +22,6 @@ if (CLUSTER_MODE && cluster.isPrimary) {
         console.log(`worker ${worker.process.pid} died`);
     });
 } else {
-    app.on('error', (err, ctx) => {
-        logger.error('Unhandled exception occurred', {
-            error: err,
-            context: ctx,
-        });
-    });
-
     server = http.createServer(app.callback());
 
     server.listen(APP_PORT, () => {
