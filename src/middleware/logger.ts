@@ -6,9 +6,15 @@ async function logMiddleware(ctx: Context, next: Next): Promise<void> {
     await next();
     const ms = Date.now() - start;
 
-    logger.info(`${ctx.method} ${ctx.url} - ${ms}ms`, {
-        statusCode: ctx.status,
-    });
+    if (ctx.status < 400) {
+        logger.info(`${ctx.method} ${ctx.url} - ${ms}ms`, {
+            status: ctx.status,
+        });
+    } else {
+        logger.error(`${ctx.method} ${ctx.url} - ${ms}ms`, {
+            status: ctx.status,
+        });
+    }
 };
 
 export default logMiddleware;
