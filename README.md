@@ -13,7 +13,7 @@ This application is a robust, scalable solution built using TypeScript and Koa.j
 
 ## App Structure and Middleware 🏗️
 - **Main Application (`app.ts`)**: Integrates middlewares like `bodyParser`, `helmet`, `cors`, and `rateLimit`. Custom middlewares include `errorHandler` for error handling and `loggerMiddleware` for request logging.
-- **Middlewares**: Custom error handling (`errorHandler.ts`), consistant response formatter (`responseFormatter.ts`) and request logging (`logger.ts`).
+- **Middlewares**: Custom error handling (`errorHandler.ts`), consistant response formatter (`responseFormatter.ts`), authentication middleware (`authChecker.ts`) and request logging (`logger.ts`).
 - **Routes**: Includes a health check route (`healthCheckRoute.ts`).
 
 ## Middleware Overview
@@ -29,6 +29,10 @@ This application is a robust, scalable solution built using TypeScript and Koa.j
 ### Response Formatter (`responseFormatter.ts`)
 - **Purpose:** Ensures that all successful HTTP responses follow a consistent format.
 - **Functionality:** For HTTP responses with status codes < 400, it reformats the response body to include a result field set to 'ok' and a data field containing the original response content. This standardizes the successful response structure for the client-side.
+
+### Authentication Middleware (`authMiddleware.ts`)
+- **Purpose:** Ensures that certain routes are only accessible to authenticated users.
+- **Functionality:** Verifies the presence and validity of a JWT token in the request. If the token is valid, it allows access to the protected route. If not, it returns a 401 Unauthorized response.
 
 ## MongoDB Integration 🍃
 The application includes MongoDB as its primary database, providing a reliable and scalable solution for data management. The integration is handled through Mongoose, a powerful ODM for MongoDB with TypeScript support.

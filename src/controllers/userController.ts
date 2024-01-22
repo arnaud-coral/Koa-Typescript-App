@@ -16,7 +16,8 @@ interface LoginRequestBody {
 
 class UserController {
     async registerUser(ctx: Context) {
-        const { username, email, password } = ctx.request.body as RegisterRequestBody;
+        const { username, email, password } = ctx.request
+            .body as RegisterRequestBody;
 
         const isUsernameTaken = await userService.isUsernameTaken(username);
         if (isUsernameTaken) {
@@ -36,15 +37,14 @@ class UserController {
             );
         }
 
-        const user = await userService.registerUser(
-            username,
-            email,
-            password
-        );
+        const user = await userService.registerUser(username, email, password);
 
         ctx.status = 201;
-        ctx.body = { message: 'User successfully registered', userId: user._id };
-    };
+        ctx.body = {
+            message: 'User successfully registered',
+            userId: user._id,
+        };
+    }
 
     async loginUser(ctx: Context) {
         const { email, password } = ctx.request.body as LoginRequestBody;
@@ -62,7 +62,16 @@ class UserController {
         ctx.cookies.set('Authorization', token, { httpOnly: true });
         ctx.status = 200;
         ctx.body = { message: 'Login successful' };
-    };
+    }
+
+    async logoutUser(ctx: Context) {
+        ctx.cookies.set('Authorization', '', {
+            httpOnly: true,
+            expires: new Date(0),
+        });
+        ctx.status = 200;
+        ctx.body = { message: 'Logout successful' };
+    }
 
     async deleteUser(ctx: Context) {
         const userId = ctx.params.id;
@@ -73,7 +82,7 @@ class UserController {
 
         ctx.status = 200;
         ctx.body = { message: 'User successfully deleted' };
-    };
+    }
 }
 
 export default new UserController();
