@@ -13,8 +13,22 @@ This application is a robust, scalable solution built using TypeScript and Koa.j
 
 ## App Structure and Middleware 🏗️
 - **Main Application (`app.ts`)**: Integrates middlewares like `bodyParser`, `helmet`, `cors`, and `rateLimit`. Custom middlewares include `errorHandler` for error handling and `loggerMiddleware` for request logging.
-- **Middleware**: Custom error handling (`errorHandler.ts`) and request logging (`logger.ts`).
+- **Middlewares**: Custom error handling (`errorHandler.ts`), consistant response formatter (`responseFormatter.ts`) and request logging (`logger.ts`).
 - **Routes**: Includes a health check route (`healthCheckRoute.ts`).
+
+## Middleware Overview
+
+### Error Handler (`errorHandler.ts`)
+- **Purpose:** Manages the handling of errors across the application. This middleware standardizes the response format for errors and ensures consistent error reporting.
+- **Functionality:** Captures exceptions thrown in downstream middleware. If the error is an instance of `HttpError`, the middleware sends a response with specific error details (status, code, message). For other types of errors, it sends a generic internal server error message and logs the error for debugging purposes.
+
+### Logger (`logger.ts`)
+- **Purpose:** Provides logging for all HTTP requests and responses, helping in monitoring and debugging the application.
+- **Functionality:** Logs details of each HTTP request and response, including the HTTP method, URL, and processing time. It logs information as 'info' for successful responses and as 'error' for client or server error responses. This assists in understanding the application's traffic and identifying potential issues.
+
+### Response Formatter (`responseFormatter.ts`)
+- **Purpose:** Ensures that all successful HTTP responses follow a consistent format.
+- **Functionality:** For HTTP responses with status codes < 400, it reformats the response body to include a result field set to 'ok' and a data field containing the original response content. This standardizes the successful response structure for the client-side.
 
 ## MongoDB Integration 🍃
 The application includes MongoDB as its primary database, providing a reliable and scalable solution for data management. The integration is handled through Mongoose, a powerful ODM for MongoDB with TypeScript support.
