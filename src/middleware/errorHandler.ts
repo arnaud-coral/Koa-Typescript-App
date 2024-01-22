@@ -23,9 +23,9 @@ async function errorHandler(ctx: Context, next: Next): Promise<void> {
             ctx.status = error.status;
             ctx.body = {
                 result: 'error',
+                status: error.status,
                 data: {
                     code: error.code,
-                    status: error.status,
                     message: error.message,
                 },
             };
@@ -34,9 +34,9 @@ async function errorHandler(ctx: Context, next: Next): Promise<void> {
             ctx.status = 500;
             ctx.body = {
                 result: 'error',
+                status: 500,
                 data: {
                     code: 'INTERNAL_SERVER_ERROR',
-                    status: 500,
                     message: 'An internal server error occurred.',
                 },
             };
