@@ -13,7 +13,7 @@ class HealthCheckController {
             );
         }
         ctx.status = 200;
-        ctx.body = { result: 'ok', data: { message: healthStatus }};
+        ctx.body = { message: healthStatus };
     };
 }
 

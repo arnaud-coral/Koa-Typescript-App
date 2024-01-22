@@ -43,13 +43,7 @@ class UserController {
         );
 
         ctx.status = 201;
-        ctx.body = {
-            result: 'ok',
-            data: {
-                message: 'User successfully registered',
-                userId: user._id
-            }
-        };
+        ctx.body = { message: 'User successfully registered', userId: user._id };
     };
 
     async loginUser(ctx: Context) {
@@ -67,7 +61,7 @@ class UserController {
 
         ctx.cookies.set('Authorization', token, { httpOnly: true });
         ctx.status = 200;
-        ctx.body = { result: 'ok', data: { message: 'Login successful' }};
+        ctx.body = { message: 'Login successful' };
     };
 
     async deleteUser(ctx: Context) {
@@ -78,7 +72,7 @@ class UserController {
         }
 
         ctx.status = 200;
-        ctx.body = { result: 'ok', data: { message: 'User successfully deleted' }};
+        ctx.body = { message: 'User successfully deleted' };
     };
 }
 

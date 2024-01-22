@@ -1,5 +1,6 @@
 import Koa from 'koa';
 import errorHandler from './middleware/errorHandler';
+import responseFormatter from './middleware/responseFormatter';
 import loggerMiddleware from './middleware/logger';
 import bodyParser from 'koa-bodyparser';
 import helmet from 'koa-helmet';
@@ -37,6 +38,7 @@ app.use(
 app.use(bodyParser());
 app.use(loggerMiddleware);
 app.use(errorHandler);
+app.use(responseFormatter);
 
 const routes = loadRoutes();
 routes.forEach((route) => {
