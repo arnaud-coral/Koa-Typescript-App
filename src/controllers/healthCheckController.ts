@@ -1,9 +1,9 @@
-import Koa from 'koa';
+import { Context } from 'koa';
 import healthCheckService from '../services/healthCheckService';
 import { HttpError } from '../middleware/errorHandler';
 
 class HealthCheckController {
-    async checkHealth(ctx: Koa.Context) {
+    async checkHealth(ctx: Context) {
         const healthStatus = await healthCheckService.checkHealth();
         if (healthStatus?.status !== 'UP') {
             throw new HttpError(

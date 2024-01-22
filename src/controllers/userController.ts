@@ -1,4 +1,4 @@
-import Koa from 'koa';
+import { Context } from 'koa';
 import userService from '../services/userService';
 import { generateJWT } from '../helpers/jwtEmitter';
 import { HttpError } from '../middleware/errorHandler';
@@ -15,7 +15,7 @@ interface LoginRequestBody {
 }
 
 class UserController {
-    async registerUser(ctx: Koa.Context) {
+    async registerUser(ctx: Context) {
         const { username, email, password } = ctx.request.body as RegisterRequestBody;
 
         const isUsernameTaken = await userService.isUsernameTaken(username);
@@ -52,7 +52,7 @@ class UserController {
         };
     };
 
-    async loginUser(ctx: Koa.Context) {
+    async loginUser(ctx: Context) {
         const { email, password } = ctx.request.body as LoginRequestBody;
         const user = await userService.authenticateUser(email, password);
         if (!user) {
@@ -70,7 +70,7 @@ class UserController {
         ctx.body = { result: 'ok', data: { message: 'Login successful' }};
     };
 
-    async deleteUser(ctx: Koa.Context) {
+    async deleteUser(ctx: Context) {
         const userId = ctx.params.id;
         const isDeletedUser = await userService.deleteUser(userId);
         if (!isDeletedUser) {
