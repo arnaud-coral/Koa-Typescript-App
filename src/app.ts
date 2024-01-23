@@ -9,12 +9,11 @@ import rateLimit from 'koa-ratelimit';
 import Redis from 'ioredis';
 import connectDB from './helpers/mongoConnector';
 import loadRoutes from './helpers/routesLoader';
+import config from './config/constants';
 
 
-const REDIS_HOST = process.env.REDIS_HOST || 'redis';
-const REDIS_PORT = process.env.REDIS_PORT
-    ? parseInt(process.env.REDIS_PORT, 10)
-    : 6379;
+const REDIS_HOST = config.redisHost;
+const REDIS_PORT = config.redisPort;
 
 const app = new Koa();
 

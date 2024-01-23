@@ -1,8 +1,12 @@
 import mongoose from 'mongoose';
+import config from '../config/constants';
+
+const MONGO_HOST = config.mongoHost;
+const MONGO_PORT = config.mongoPort;
+const MONGO_DB = config.mongoDb;
 
 const connectDB = async () => {
-    const mongoUri =
-        process.env.MONGO_URI || `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`;
+    const mongoUri = `mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}`;
     try {
         await mongoose.connect(mongoUri);
     } catch (error) {

@@ -14,10 +14,13 @@ interface LoginRequestBody {
     password: string;
 }
 
+interface ValidateEmailRequestBody {
+    token: string;
+}
+
 class UserController {
     async registerUser(ctx: Context) {
-        const { username, email, password } = ctx.request
-            .body as RegisterRequestBody;
+        const { username, email, password } = ctx.request.body as RegisterRequestBody;
 
         const isUsernameTaken = await userService.isUsernameTaken(username);
         if (isUsernameTaken) {
@@ -37,13 +40,38 @@ class UserController {
             );
         }
 
-        const user = await userService.registerUser(username, email, password);
+        const validationToken = userService.generateValidationToken();
+        const user = await userService.registerUser(
+            username,
+            email,
+            password,
+            validationToken.token,
+            validationToken.expiration
+        );
+
+        userService.sendValidationEmail(user.email, validationToken.token);
 
         ctx.status = 201;
         ctx.body = {
             message: 'User successfully registered',
             userId: user._id,
         };
+    }
+
+    async validateEmail(ctx: Context) {
+        const { token } = ctx.request.body as ValidateEmailRequestBody;
+        const user = await userService.validateToken(token);
+
+        if (!user) {
+            throw new HttpError(
+                'Invalid or expired token',
+                400,
+                'TOKEN_INVALID'
+            );
+        }
+
+        ctx.status = 200;
+        ctx.body = { message: 'Email validated successfully.' };
     }
 
     async loginUser(ctx: Context) {

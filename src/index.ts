@@ -3,10 +3,10 @@ import cluster from 'cluster';
 import os from 'os';
 import http from 'http';
 import app from './app';
-import logger from './config/loggingConfig';
+import config from './config/constants';
 
-const APP_PORT = process.env.APP_PORT || 3000;
-const CLUSTER_MODE = process.env.CLUSTER_MODE === 'true';
+const APP_PORT = config.appPort;
+const CLUSTER_MODE = config.clusterMode;
 
 let server;
 

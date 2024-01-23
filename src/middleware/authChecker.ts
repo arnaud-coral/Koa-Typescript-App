@@ -1,10 +1,9 @@
 import { Context, Next } from 'koa';
 import jwt from 'jsonwebtoken';
 import { HttpError } from './errorHandler';
+import config from '../config/constants';
 
-const secretKey =
-    process.env.JWT_SECRET ||
-    'NgYRotemandeOmEterOmEkInTeXurynCEmITORIneUMpoRymphMBionOmYcEspOtembroFAularanUTiOnAilDoXAnDERmEAHesp';
+const JWT_SECRET = config.jwtSecret;
 
 async function authChecker(ctx: Context, next: Next): Promise<void> {
     try {
@@ -14,7 +13,7 @@ async function authChecker(ctx: Context, next: Next): Promise<void> {
             throw new HttpError('No token provided', 401, 'NO_TOKEN');
         }
 
-        jwt.verify(token, secretKey);
+        jwt.verify(token, JWT_SECRET);
 
         await next();
     } catch (error) {

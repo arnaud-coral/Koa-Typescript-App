@@ -1,5 +1,10 @@
 import User from '../models/userModel';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import emailService from './emailService';
+import config from '../config/constants';
+
+const VALIDATION_LINK = config.validationLink;
 
 class UserService {
     async isUsernameTaken(username: string) {
@@ -14,8 +19,51 @@ class UserService {
         return !!existingUser;
     }
 
-    async registerUser(username: string, email: string, password: string) {
-        const user = new User({ username, email, password });
+    async registerUser(
+        username: string,
+        email: string,
+        password: string,
+        emailValidationToken: string,
+        tokenExpiration: Date
+    ) {
+        const user = new User({
+            username,
+            email,
+            password,
+            emailValidationToken,
+            tokenExpiration,
+        });
+        await user.save();
+
+        return user;
+    }
+
+    generateValidationToken() {
+        const token = crypto.randomBytes(20).toString('hex');
+        const expiration = new Date();
+        expiration.setHours(expiration.getHours() + 24);
+        return { token, expiration };
+    }
+
+    sendValidationEmail(email: string, token: string) {
+        const validationLink = `${VALIDATION_LINK}${token}`;
+        emailService.sendEmail(
+            email,
+            'Email Validation',
+            `Please validate your email: ${validationLink}`
+        );
+    }
+
+    async validateToken(token: string) {
+        const user = await User.findOne({
+            emailValidationToken: token,
+            tokenExpiration: { $gt: new Date() },
+        });
+        if (!user) return null;
+
+        user.isEmailValidated = true;
+        user.emailValidationToken = undefined;
+        user.tokenExpiration = undefined;
         await user.save();
 
         return user;
