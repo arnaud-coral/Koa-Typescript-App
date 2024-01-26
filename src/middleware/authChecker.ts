@@ -13,7 +13,10 @@ async function authChecker(ctx: Context, next: Next): Promise<void> {
             throw new HttpError('No token provided', 401, 'NO_TOKEN');
         }
 
-        jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
+        if (decoded && decoded.userId) {
+            ctx.state.user = { id: decoded.userId };
+        }
 
         await next();
     } catch (error) {

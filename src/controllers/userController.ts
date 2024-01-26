@@ -52,10 +52,7 @@ class UserController {
         userService.sendValidationEmail(user.email, validationToken.token);
 
         ctx.status = 201;
-        ctx.body = {
-            message: 'User successfully registered',
-            userId: user._id,
-        };
+        ctx.body = { message: 'User successfully registered', user };
     }
 
     async validateEmail(ctx: Context) {
@@ -110,6 +107,21 @@ class UserController {
 
         ctx.status = 200;
         ctx.body = { message: 'User successfully deleted' };
+    }
+
+    async getUser(ctx: Context) {
+        const userId = ctx.state.user?.id;
+        if (!userId) {
+            throw new HttpError('User not found', 400, 'USER_NOT_FOUND');
+        }
+
+        const user = await userService.getUserById(userId);
+        if (!user) {
+            throw new HttpError('User not found', 400, 'USER_NOT_FOUND');
+        }
+    
+        ctx.status = 200;
+        ctx.body = { message: 'User successfully fetched', user };
     }
 }
 

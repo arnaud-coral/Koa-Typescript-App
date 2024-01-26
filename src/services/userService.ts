@@ -1,4 +1,5 @@
 import User from '../models/userModel';
+import { userAdapter } from '../adapters/userAdapter';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import emailService from './emailService';
@@ -35,7 +36,7 @@ class UserService {
         });
         await user.save();
 
-        return user;
+        return userAdapter(user);
     }
 
     generateValidationToken() {
@@ -90,6 +91,12 @@ class UserService {
         }
 
         return true;
+    }
+
+    async getUserById(userId: string) {
+        const user = await User.findById(userId);
+
+        return user ? userAdapter(user) : null;
     }
 }
 
