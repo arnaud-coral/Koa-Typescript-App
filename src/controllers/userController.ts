@@ -63,15 +63,20 @@ class UserController {
     }
 
     async validateEmail(ctx: Context) {
-        const { token } = ctx.request.body as ValidateEmailRequestBody;
+        const token = ctx.query.token;
+
+        if (Array.isArray(token)) {
+            throw new HttpError('Multiple tokens are not allowed', 400, 'MULTIPLE_TOKENS');
+        }
+
+        if (!token) {
+            throw new HttpError('Token is required', 400, 'TOKEN_REQUIRED');
+        }
+
         const user = await userService.validateToken(token);
 
         if (!user) {
-            throw new HttpError(
-                'Invalid or expired token',
-                400,
-                'TOKEN_INVALID'
-            );
+            throw new HttpError('Invalid or expired token', 400, 'TOKEN_INVALID');
         }
 
         ctx.status = 200;
