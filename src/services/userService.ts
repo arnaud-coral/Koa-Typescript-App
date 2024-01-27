@@ -1,11 +1,6 @@
+import bcrypt from 'bcryptjs';
 import User from '../models/userModel';
 import { userAdapter } from '../adapters/userAdapter';
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
-import emailService from './emailService';
-import config from '../config/constants';
-
-const VALIDATION_LINK = config.validationLink;
 
 class UserService {
     async isUsernameTaken(username: string) {
@@ -37,22 +32,6 @@ class UserService {
         await user.save();
 
         return userAdapter(user);
-    }
-
-    generateValidationToken() {
-        const token = crypto.randomBytes(20).toString('hex');
-        const expiration = new Date();
-        expiration.setHours(expiration.getHours() + 24);
-        return { token, expiration };
-    }
-
-    sendValidationEmail(email: string, token: string) {
-        const validationLink = `${VALIDATION_LINK}${token}`;
-        emailService.sendEmail(
-            email,
-            'Email Validation',
-            `Please validate your email: ${validationLink}`
-        );
     }
 
     async validateToken(token: string) {
@@ -95,6 +74,14 @@ class UserService {
 
     async getUserById(userId: string) {
         const user = await User.findById(userId);
+
+        return user ? userAdapter(user) : null;
+    }
+
+    async updateUser(userId: string, updateData: any) {
+        const user = await User.findByIdAndUpdate(userId, updateData, {
+            new: true,
+        });
 
         return user ? userAdapter(user) : null;
     }

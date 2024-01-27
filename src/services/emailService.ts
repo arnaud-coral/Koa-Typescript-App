@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 import config from '../config/constants';
 
 const MAILSERVER_HOST = config.mailserverHost;
@@ -6,6 +7,7 @@ const MAILSERVER_PORT = config.mailserverPort;
 const MAILSERVER_USER = config.mailserverUser;
 const MAILSERVER_PWD = config.mailserverPassword;
 const MAILSERVER_FROM = config.mailserverFrom;
+const VALIDATION_LINK = config.validationLink;
 
 class EmailService {
     private transporter;
@@ -34,6 +36,22 @@ class EmailService {
         } catch (error) {
             console.error('Error sending email:', error);
         }
+    }
+
+    generateEmailValidationToken() {
+        const token = crypto.randomBytes(20).toString('hex');
+        const expiration = new Date();
+        expiration.setHours(expiration.getHours() + 24);
+        return { token, expiration };
+    }
+
+    sendValidationEmail(email: string, token: string) {
+        const validationLink = `${VALIDATION_LINK}${token}`;
+        this.sendEmail(
+            email,
+            'Email Validation',
+            `Please validate your email: ${validationLink}`
+        );
     }
 }
 
