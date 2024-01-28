@@ -85,6 +85,32 @@ class UserService {
 
         return user ? userAdapter(user) : null;
     }
+
+    async canRequestValidationLink(userId: string): Promise<boolean> {
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const lastRequested = user.lastValidationRequest;
+        if (
+            lastRequested &&
+            new Date().getTime() - new Date(lastRequested).getTime() <
+                15 * 60 * 1000
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    async updateValidationToken(userId: string, token: string, expiration: Date) {
+        await User.findByIdAndUpdate(userId, {
+            emailValidationToken: token,
+            tokenExpiration: expiration,
+            lastValidationRequest: new Date(),
+        });
+    }
 }
 
 export default new UserService();

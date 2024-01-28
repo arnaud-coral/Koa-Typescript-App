@@ -7,7 +7,7 @@ interface User {
 }
 
 interface UserModel extends User, Document {
-    
+
 }
 
 export function userAdapter(user: UserModel): User & { id: string } {

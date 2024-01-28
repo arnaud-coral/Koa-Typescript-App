@@ -15,15 +15,10 @@ interface LoginRequestBody {
     password: string;
 }
 
-interface ValidateEmailRequestBody {
-    token: string;
-}
-
 interface UpdateUserProfileRequestBody {
     email?: string;
     username?: string;
 }
-
 
 class UserController {
     async registerUser(ctx: Context) {
@@ -31,20 +26,12 @@ class UserController {
 
         const isUsernameTaken = await userService.isUsernameTaken(username);
         if (isUsernameTaken) {
-            throw new HttpError(
-                'Username is already taken',
-                400,
-                'USERNAME_TAKEN'
-            );
+            throw new HttpError('Username is already taken', 400, 'USERNAME_TAKEN');
         }
 
         const isEmailTaken = await userService.isEmailTaken(email);
         if (isEmailTaken) {
-            throw new HttpError(
-                'Email is already registered',
-                400,
-                'EMAIL_REGISTERED'
-            );
+            throw new HttpError('Email is already registered', 400, 'EMAIL_REGISTERED');
         }
 
         const validationToken = emailService.generateEmailValidationToken();
@@ -74,7 +61,6 @@ class UserController {
         }
 
         const user = await userService.validateToken(token);
-
         if (!user) {
             throw new HttpError('Invalid or expired token', 400, 'TOKEN_INVALID');
         }
@@ -87,11 +73,7 @@ class UserController {
         const { email, password } = ctx.request.body as LoginRequestBody;
         const user = await userService.authenticateUser(email, password);
         if (!user) {
-            throw new HttpError(
-                'Invalid email or password',
-                401,
-                'INVALID_CREDENTIALS'
-            );
+            throw new HttpError('Invalid email or password', 401, 'INVALID_CREDENTIALS');
         }
 
         const token = generateJWT(user);
@@ -180,10 +162,7 @@ class UserController {
                 tokenExpiration: validationToken.expiration,
             });
 
-            emailService.sendValidationEmail(
-                updateData.email,
-                validationToken.token
-            );
+            emailService.sendValidationEmail(updateData.email, validationToken.token);
         } else {
             updatedUser = await userService.updateUser(userId, updateData);
         }
@@ -193,6 +172,33 @@ class UserController {
             message: 'User profile updated successfully',
             user: updatedUser,
         };
+    }
+
+    async requestValidationLink(ctx: Context) {
+        const userId = ctx.state.user?.id;
+        if (!userId) {
+            throw new HttpError('User not found', 400, 'USER_NOT_FOUND');
+        }
+
+        const user = await userService.getUserById(userId);
+        if (user?.email) {
+            const canRequestLink = await userService.canRequestValidationLink(userId);
+            if (!canRequestLink) {
+                throw new HttpError('Validation link can only be requested once every 15 minutes', 400, 'REQUEST_LIMIT_EXCEEDED');
+            }
+
+            const validationToken = emailService.generateEmailValidationToken();
+            await userService.updateValidationToken(
+                userId,
+                validationToken.token,
+                validationToken.expiration
+            );
+
+            emailService.sendValidationEmail(user.email, validationToken.token);
+        }
+
+        ctx.status = 200;
+        ctx.body = { message: 'Validation link sent successfully.' };
     }
 }
 
