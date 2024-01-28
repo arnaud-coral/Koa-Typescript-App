@@ -63,6 +63,20 @@ class UserService {
         return user;
     }
 
+    async isCurrentPasswordMatching(userId: string, password: string) {
+        const user = await User.findById(userId);
+        if (!user) {
+            return false;
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return false;
+        }
+
+        return true;
+    }
+
     async deleteUser(userId: string) {
         const result = await User.findByIdAndDelete(userId);
         if (!result) {

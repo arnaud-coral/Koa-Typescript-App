@@ -20,6 +20,11 @@ interface UpdateUserProfileRequestBody {
     username?: string;
 }
 
+interface UpdateUserPasswordRequestBody {
+    current: string;
+    new: string;
+}
+
 class UserController {
     async registerUser(ctx: Context) {
         const { username, email, password } = ctx.request.body as RegisterRequestBody;
@@ -64,6 +69,11 @@ class UserController {
     }
 
     async logoutUser(ctx: Context) {
+        const userId = ctx.state.user?.id;
+        if (!userId) {
+            throw new HttpError('User not found', 400, 'USER_NOT_FOUND');
+        }
+
         ctx.cookies.set('Authorization', '', {
             httpOnly: true,
             expires: new Date(0),
@@ -155,6 +165,19 @@ class UserController {
     }
 
     async updateUserPassword(ctx: Context) {
+        const userId = ctx.state.user?.id;
+        if (!userId) {
+            throw new HttpError('User not found', 400, 'USER_NOT_FOUND');
+        }
+
+        const password = ctx.request.body as UpdateUserPasswordRequestBody;
+        const isCurrentPasswordMatching = await userService.isCurrentPasswordMatching(userId, password.current);
+        if (!isCurrentPasswordMatching) {
+            throw new HttpError('Current password is invalid', 400, 'INVALID_CURRENT_PASSWORD');
+        }
+
+        await userService.updateUser(userId, { password: password.new });
+
         ctx.status = 200;
         ctx.body = { message: 'Password updated successfully.' };
     }
