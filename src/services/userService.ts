@@ -93,15 +93,25 @@ class UserService {
         }
 
         const lastRequested = user.lastValidationRequest;
-        if (
-            lastRequested &&
-            new Date().getTime() - new Date(lastRequested).getTime() <
-                15 * 60 * 1000
-        ) {
+        if (lastRequested && new Date().getTime() - new Date(lastRequested).getTime() < 15 * 60 * 1000) {
             return false;
         }
 
         return true;
+    }
+
+    async isEmailValidated(userId: string): Promise<boolean> {
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const isEmailValidated = user.isEmailValidated;
+        if (isEmailValidated) {
+            return true;
+        }
+
+        return false;
     }
 
     async updateValidationToken(userId: string, token: string, expiration: Date) {

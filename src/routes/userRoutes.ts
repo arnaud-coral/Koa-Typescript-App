@@ -14,9 +14,6 @@ router.post('logout', authChecker, userController.logoutUser);
 router.get('me', authChecker, userController.getUser);
 router.put('me', authChecker, userController.updateUserProfile);
 router.delete('me', authChecker, userController.deleteUser);
-
-// Email validation
-router.post('request-validation', authChecker, userController.requestValidationLink);
-router.get('validate-email', userController.validateEmail);
+router.get('me/password', authChecker, userController.updateUserPassword);
 
 export default router;
