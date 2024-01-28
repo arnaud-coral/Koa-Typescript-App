@@ -57,10 +57,20 @@ class UserService {
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
+            await User.updateOne(
+                { _id: user._id },
+                { $inc: { loginAttempts: 1 } }
+            );
             return false;
         }
 
+        await User.updateOne({ _id: user._id }, { $set: { loginAttempts: 0 } });
         return user;
+    }
+
+    async isAccountLocked(email: string) {
+        const user = await User.findOne({ email });
+        return user && user.loginAttempts >= 5;
     }
 
     async isCurrentPasswordMatching(userId: string, password: string) {
@@ -107,7 +117,11 @@ class UserService {
         }
 
         const lastRequested = user.lastValidationRequest;
-        if (lastRequested && new Date().getTime() - new Date(lastRequested).getTime() < 15 * 60 * 1000) {
+        if (
+            lastRequested &&
+            new Date().getTime() - new Date(lastRequested).getTime() <
+                15 * 60 * 1000
+        ) {
             return false;
         }
 
@@ -128,7 +142,11 @@ class UserService {
         return false;
     }
 
-    async updateValidationToken(userId: string, token: string, expiration: Date) {
+    async updateValidationToken(
+        userId: string,
+        token: string,
+        expiration: Date
+    ) {
         await User.findByIdAndUpdate(userId, {
             emailValidationToken: token,
             tokenExpiration: expiration,

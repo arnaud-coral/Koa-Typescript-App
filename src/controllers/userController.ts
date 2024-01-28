@@ -56,6 +56,12 @@ class UserController {
 
     async loginUser(ctx: Context) {
         const { email, password } = ctx.request.body as LoginRequestBody;
+
+        const isAccountLocked = await userService.isAccountLocked(email);
+        if (isAccountLocked) {
+            throw new HttpError('Account is locked due to multiple failed login attempts', 403, 'ACCOUNT_LOCKED');
+        }
+
         const user = await userService.authenticateUser(email, password);
         if (!user) {
             throw new HttpError('Invalid email or password', 401, 'INVALID_CREDENTIALS');
