@@ -22,6 +22,7 @@ interface Config {
     mailserverPassword: string;
     mailserverFrom: string;
     validationLink: string;
+    stripeSecret: string;
 }
 
 const config: Config = {
@@ -42,6 +43,7 @@ const config: Config = {
     mailserverPassword: process.env.MAILSERVER_PWD || '',
     mailserverFrom: process.env.MAILSERVER_FROM || '',
     validationLink: process.env.VALIDATION_LINK || '',
+    stripeSecret: process.env.STRIPE_SECRET_KEY || '',
 };
 
 export default config;
